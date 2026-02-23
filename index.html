@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a5f7a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <title>BookReader</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="https://progressier.app/koQqbxmcT3fLpo4IbM8P/script.js"></script>
+</head>
+<body>
+    <div class="main-wrapper">
+        <!-- Top Ad Banner -->
+        <div class="ad-banner" id="ad-top">
+            <div class="ad-content">📢 Sponsor Advertisement</div>
+        </div>
+
+        <div class="container">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <h1>BookReader</h1>
+                    <div class="header-controls">
+                        <select id="book-select" class="book-select">
+                            <option value="alice">Alice in Wonderland</option>
+                            <option value="sherlock">Sherlock Holmes</option>
+                            <option value="pride">Pride and Prejudice</option>
+                        </select>
+                        <a href="https://github.com/wasii-star/BookReader" target="_blank" class="github-link" title="View on GitHub">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </a>
+                        <label class="file-input-label">
+                            <input type="file" id="file-input" accept=".txt,.pdf" style="display: none;">
+                            📁 Open File
+                        </label>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                <!-- Reading Area -->
+                <div class="reading-container">
+                    <div class="book-content" id="book-content"></div>
+                </div>
+
+                <!-- Side Ad -->
+                <aside class="side-ad" id="ad-side">
+                    <div class="ad-content">Ads</div>
+                </aside>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button id="prev-btn" class="btn btn-prev">← Previous</button>
+                <div class="progress-info">
+                    <span id="page-count">Page 1 of 10</span>
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                </div>
+                <button id="next-btn" class="btn btn-next">Next →</button>
+            </div>
+
+            <!-- Settings -->
+            <div class="settings">
+                <div class="setting-group">
+                    <label>Font Size</label>
+                    <input type="range" id="font-size" min="12" max="24" value="16">
+                    <span id="font-size-value">16</span>
+                </div>
+                <div class="setting-group">
+                    <label>Line Height</label>
+                    <input type="range" id="line-height" min="1.2" max="2" step="0.1" value="1.5">
+                    <span id="line-height-value">1.5</span>
+                </div>
+                <label class="dark-mode-toggle">
+                    <input type="checkbox" id="dark-mode">
+                    <span>Dark Mode</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Bottom Ad Banner -->
+        <div class="ad-banner" id="ad-bottom">
+            <div class="ad-content">📢 Sponsor Advertisement</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

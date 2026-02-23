@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a5f7a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d3f52;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="512" height="512" fill="url(#bgGradient)" rx="100"/>
+  
+  <!-- Open Book Left Page -->
+  <path d="M 100 120 Q 150 120 180 140 L 180 380 Q 150 360 100 360 Z" fill="#f4a261" opacity="0.9"/>
+  
+  <!-- Open Book Right Page -->
+  <path d="M 332 120 Q 282 120 252 140 L 252 380 Q 282 360 332 360 Z" fill="#f4a261"/>
+  
+  <!-- Book Spine -->
+  <rect x="180" y="120" width="72" height="240" fill="#d4895a"/>
+  
+  <!-- Text Lines on Left Page -->
+  <line x1="115" y1="160" x2="160" y2="160" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="115" y1="185" x2="160" y2="185" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="115" y1="210" x2="160" y2="210" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="115" y1="235" x2="155" y2="235" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="115" y1="260" x2="160" y2="260" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Text Lines on Right Page -->
+  <line x1="270" y1="160" x2="315" y2="160" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="270" y1="185" x2="315" y2="185" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="270" y1="210" x2="315" y2="210" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="270" y1="235" x2="305" y2="235" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  <line x1="270" y1="260" x2="315" y2="260" stroke="#1a5f7a" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Highlight/Shine Effect -->
+  <ellipse cx="150" cy="180" rx="25" ry="40" fill="white" opacity="0.15"/>
+  <ellipse cx="290" cy="180" rx="25" ry="40" fill="white" opacity="0.15"/>
+</svg>
