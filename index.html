@@ -12,8 +12,16 @@
     <link rel="apple-touch-icon" href="icon.svg">
     <title>BookReader</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="https://progressier.app/koQqbxmcT3fLpo4IbM8P/progressier.json" />
     <script defer src="https://progressier.app/koQqbxmcT3fLpo4IbM8P/script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./progressier.js')
+                    .then(reg => console.log('Service worker registered!', reg))
+                    .catch(err => console.log('Service worker registration failed: ', err));
+            });
+        }
+    </script>
 </head>
 
 <body>

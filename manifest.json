@@ -2,7 +2,7 @@
   "name": "BookReader",
   "short_name": "BookReader",
   "description": "A minimal, elegant book reader web app",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fefdf9",
   "theme_color": "#1a5f7a",
