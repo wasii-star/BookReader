@@ -46,13 +46,17 @@ const progressFill = document.getElementById('progress-fill');
 const fileInput = document.getElementById('file-input');
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
+const searchNextBtn = document.getElementById('search-next');
+const searchPrevBtn = document.getElementById('search-prev');
 
 let bookProgress = {};
+let searchResults = [];
+let currentSearchResultIndex = -1;
 
 function init() {
     setupEventListeners();
     loadSettings();
-    loadBook('alice');
+    loadBook(currentBook);
 }
 
 function setupEventListeners() {
@@ -94,6 +98,8 @@ function setupEventListeners() {
     });
 
     searchBtn.addEventListener('click', performSearch);
+    searchNextBtn.addEventListener('click', () => navigateSearchResult(1));
+    searchPrevBtn.addEventListener('click', () => navigateSearchResult(-1));
 }
 
 function handleFileUpload(e) {
@@ -173,10 +179,10 @@ function readEpubFile(file) {
 function loadCustomBook(title, content) {
     const pages = splitIntoPages(content);
     currentBook = 'custom';
-    currentPage = 0;
+    bookProgress[currentBook] = 0;
     books.custom = { title: title.replace(/\.[^/.]+$/, ''), pages: pages };
     bookSelect.value = 'custom';
-    displayPage();
+    loadBook('custom');
 }
 
 function splitIntoPages(content) {
@@ -191,48 +197,80 @@ function splitIntoPages(content) {
 function loadBook(bookKey) {
     currentBook = bookKey;
     currentPage = bookProgress[bookKey] || 0;
+    searchResults = [];
+    currentSearchResultIndex = -1;
+    updateSearchButtons();
     displayPage();
 }
 
 function performSearch() {
     const term = searchInput.value.trim().toLowerCase();
-    if (!term) return;
-
-    const book = books[currentBook];
-
-    // Check current page first
-    if (book.pages[currentPage].toLowerCase().includes(term)) {
-        displayPage(term);
+    if (!term) {
+        searchResults = [];
+        currentSearchResultIndex = -1;
+        updateSearchButtons();
+        displayPage();
         return;
     }
 
-    // Search entire book
+    const book = books[currentBook];
+    searchResults = [];
+
     for (let i = 0; i < book.pages.length; i++) {
         if (book.pages[i].toLowerCase().includes(term)) {
-            currentPage = i;
-            displayPage(term);
-            saveSettings();
-            return;
+            searchResults.push(i);
         }
     }
 
-    alert('Term not found in this book.');
+    if (searchResults.length > 0) {
+        currentSearchResultIndex = 0;
+        currentPage = searchResults[currentSearchResultIndex];
+        displayPage(term);
+        saveSettings();
+    } else {
+        alert('Term not found in this book.');
+        currentSearchResultIndex = -1;
+    }
+    updateSearchButtons();
+}
+
+function navigateSearchResult(direction) {
+    if (searchResults.length === 0) return;
+
+    currentSearchResultIndex += direction;
+    if (currentSearchResultIndex >= searchResults.length) currentSearchResultIndex = 0;
+    if (currentSearchResultIndex < 0) currentSearchResultIndex = searchResults.length - 1;
+
+    currentPage = searchResults[currentSearchResultIndex];
+    displayPage(searchInput.value.trim().toLowerCase());
+    saveSettings();
+    updateSearchButtons();
+}
+
+function updateSearchButtons() {
+    searchNextBtn.disabled = searchResults.length <= 1;
+    searchPrevBtn.disabled = searchResults.length <= 1;
 }
 
 function displayPage(searchTerm = '') {
-    const book = books[currentBook];
-    const content = book.pages[currentPage];
+    bookContent.classList.add('fade-out');
 
-    if (searchTerm) {
-        const regex = new RegExp(`(${searchTerm})`, 'gi');
-        bookContent.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
-    } else {
-        bookContent.textContent = content;
-    }
+    setTimeout(() => {
+        const book = books[currentBook];
+        const content = book.pages[currentPage];
 
-    updatePageCount();
-    updateButtonStates();
-    updateProgressBar();
+        if (searchTerm) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            bookContent.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
+        } else {
+            bookContent.textContent = content;
+        }
+
+        bookContent.classList.remove('fade-out');
+        updatePageCount();
+        updateButtonStates();
+        updateProgressBar();
+    }, 150);
 }
 
 function updatePageCount() {
