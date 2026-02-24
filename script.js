@@ -58,33 +58,33 @@ function init() {
 function setupEventListeners() {
     prevBtn.addEventListener('click', goToPreviousPage);
     nextBtn.addEventListener('click', goToNextPage);
-    
+
     bookSelect.addEventListener('change', (e) => {
         loadBook(e.target.value);
         saveSettings();
     });
-    
+
     fileInput.addEventListener('change', handleFileUpload);
-    
+
     fontSizeInput.addEventListener('input', (e) => {
         const size = e.target.value;
         fontSizeValue.textContent = size;
         bookContent.style.fontSize = size + 'px';
         saveSettings();
     });
-    
+
     lineHeightInput.addEventListener('input', (e) => {
         const height = e.target.value;
         lineHeightValue.textContent = height;
         bookContent.style.lineHeight = height;
         saveSettings();
     });
-    
+
     darkModeToggle.addEventListener('change', (e) => {
         e.target.checked ? document.body.classList.add('dark-mode') : document.body.classList.remove('dark-mode');
         saveSettings();
     });
-    
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') goToPreviousPage();
         if (e.key === 'ArrowRight') goToNextPage();
@@ -99,12 +99,14 @@ function setupEventListeners() {
 function handleFileUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     const fileName = file.name.toLowerCase();
     if (fileName.endsWith('.txt')) {
         readTextFile(file);
     } else if (fileName.endsWith('.pdf')) {
         readPdfFile(file);
+    } else if (fileName.endsWith('.epub')) {
+        readEpubFile(file);
     }
 }
 
@@ -138,6 +140,36 @@ function readPdfFile(file) {
     reader.readAsArrayBuffer(file);
 }
 
+function readEpubFile(file) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const data = e.target.result;
+            const book = ePub(data);
+            await book.ready;
+
+            const spine = book.spine;
+            const sectionPromises = [];
+
+            spine.each(section => {
+                sectionPromises.push(
+                    book.load(section.href).then(doc => {
+                        return doc.body.innerText || doc.body.textContent;
+                    })
+                );
+            });
+
+            const sections = await Promise.all(sectionPromises);
+            const text = sections.join('\n\n');
+            loadCustomBook(file.name, text);
+        } catch (err) {
+            console.error('EPUB Parsing Error:', err);
+            alert('Error reading EPUB file. Please ensure it is a valid, unencrypted .epub file.');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
 function loadCustomBook(title, content) {
     const pages = splitIntoPages(content);
     currentBook = 'custom';
@@ -167,7 +199,7 @@ function performSearch() {
     if (!term) return;
 
     const book = books[currentBook];
-    
+
     // Check current page first
     if (book.pages[currentPage].toLowerCase().includes(term)) {
         displayPage(term);
@@ -190,14 +222,14 @@ function performSearch() {
 function displayPage(searchTerm = '') {
     const book = books[currentBook];
     const content = book.pages[currentPage];
-    
+
     if (searchTerm) {
         const regex = new RegExp(`(${searchTerm})`, 'gi');
         bookContent.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
     } else {
         bookContent.textContent = content;
     }
-    
+
     updatePageCount();
     updateButtonStates();
     updateProgressBar();
@@ -255,16 +287,16 @@ function loadSettings() {
         fontSizeInput.value = settings.fontSize;
         fontSizeValue.textContent = settings.fontSize;
         bookContent.style.fontSize = settings.fontSize + 'px';
-        
+
         lineHeightInput.value = settings.lineHeight;
         lineHeightValue.textContent = settings.lineHeight;
         bookContent.style.lineHeight = settings.lineHeight;
-        
+
         if (settings.darkMode) {
             darkModeToggle.checked = true;
             document.body.classList.add('dark-mode');
         }
-        
+
         bookProgress = settings.bookProgress || {};
         currentBook = settings.currentBook || 'alice';
         currentPage = bookProgress[currentBook] || 0;
