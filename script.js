@@ -33,8 +33,6 @@ let scrollPosition = 0; // Stored as percentage (0 to 1)
 
 const bookContent = document.getElementById('book-content');
 const pageCount = document.getElementById('page-count');
-const prevBtn = document.getElementById('prev-btn');
-const nextBtn = document.getElementById('next-btn');
 const bookSelect = document.getElementById('book-select');
 const fontSizeInput = document.getElementById('font-size');
 const fontSizeValue = document.getElementById('font-size-value');
@@ -67,9 +65,6 @@ function init() {
 }
 
 function setupEventListeners() {
-    prevBtn.addEventListener('click', goToPreviousPage);
-    nextBtn.addEventListener('click', goToNextPage);
-
     bookSelect.addEventListener('change', (e) => {
         loadBook(e.target.value);
         saveSettings();
@@ -191,8 +186,13 @@ function loadCustomBook(title, content) {
 
 
 function loadBook(bookKey) {
+    if (!books[bookKey]) return;
     currentBook = bookKey;
-    scrollPosition = bookProgress[bookKey] || 0;
+
+    // Sanitize progress: if it's an old index (>= 1), reset to 0
+    let savedProgress = bookProgress[bookKey] || 0;
+    scrollPosition = (savedProgress > 1) ? 0 : savedProgress;
+
     searchResults = [];
     currentSearchResultIndex = -1;
     updateSearchButtons();
@@ -242,8 +242,9 @@ function updateSearchButtons() {
 
 function renderBook(searchTerm = '') {
     const book = books[currentBook];
-    let content = '';
+    if (!book) return;
 
+    let content = '';
     if (book.pages) {
         content = book.pages.join('\n\n');
     } else {
@@ -254,7 +255,8 @@ function renderBook(searchTerm = '') {
         const regex = new RegExp(`(${searchTerm})`, 'gi');
         bookContent.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
     } else {
-        bookContent.innerText = content;
+        bookContent.textContent = content; // Using textContent for better performance and security
+        bookContent.style.whiteSpace = 'pre-wrap'; // Ensure line breaks are preserved
 
         // Restore scroll position after a short delay to allow rendering
         setTimeout(() => {
