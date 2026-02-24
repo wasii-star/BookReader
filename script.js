@@ -44,6 +44,10 @@ const lineHeightValue = document.getElementById('line-height-value');
 const darkModeToggle = document.getElementById('dark-mode');
 const progressFill = document.getElementById('progress-fill');
 const fileInput = document.getElementById('file-input');
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+
+let bookProgress = {};
 
 function init() {
     setupEventListeners();
@@ -84,7 +88,12 @@ function setupEventListeners() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') goToPreviousPage();
         if (e.key === 'ArrowRight') goToNextPage();
+        if (e.key === 'Enter' && document.activeElement === searchInput) {
+            performSearch();
+        }
     });
+
+    searchBtn.addEventListener('click', performSearch);
 }
 
 function handleFileUpload(e) {
@@ -149,14 +158,46 @@ function splitIntoPages(content) {
 
 function loadBook(bookKey) {
     currentBook = bookKey;
-    currentPage = 0;
+    currentPage = bookProgress[bookKey] || 0;
     displayPage();
 }
 
-function displayPage() {
+function performSearch() {
+    const term = searchInput.value.trim().toLowerCase();
+    if (!term) return;
+
     const book = books[currentBook];
-    const page = book.pages[currentPage];
-    bookContent.textContent = page;
+    
+    // Check current page first
+    if (book.pages[currentPage].toLowerCase().includes(term)) {
+        displayPage(term);
+        return;
+    }
+
+    // Search entire book
+    for (let i = 0; i < book.pages.length; i++) {
+        if (book.pages[i].toLowerCase().includes(term)) {
+            currentPage = i;
+            displayPage(term);
+            saveSettings();
+            return;
+        }
+    }
+
+    alert('Term not found in this book.');
+}
+
+function displayPage(searchTerm = '') {
+    const book = books[currentBook];
+    const content = book.pages[currentPage];
+    
+    if (searchTerm) {
+        const regex = new RegExp(`(${searchTerm})`, 'gi');
+        bookContent.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
+    } else {
+        bookContent.textContent = content;
+    }
+    
     updatePageCount();
     updateButtonStates();
     updateProgressBar();
@@ -196,12 +237,13 @@ function goToNextPage() {
 }
 
 function saveSettings() {
+    bookProgress[currentBook] = currentPage;
     const settings = {
         fontSize: fontSizeInput.value,
         lineHeight: lineHeightInput.value,
         darkMode: darkModeToggle.checked,
         currentBook: currentBook,
-        currentPage: currentPage
+        bookProgress: bookProgress
     };
     localStorage.setItem('bookreaderSettings', JSON.stringify(settings));
 }
@@ -223,8 +265,9 @@ function loadSettings() {
             document.body.classList.add('dark-mode');
         }
         
+        bookProgress = settings.bookProgress || {};
         currentBook = settings.currentBook || 'alice';
-        currentPage = settings.currentPage || 0;
+        currentPage = bookProgress[currentBook] || 0;
         bookSelect.value = currentBook;
     }
 }

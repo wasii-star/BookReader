@@ -92,6 +92,49 @@ body.dark-mode .book-select:hover {
     color: white;
 }
 
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1.5px solid var(--primary);
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: transparent;
+    transition: all 0.2s;
+}
+
+.search-container:focus-within {
+    box-shadow: 0 0 0 2px rgba(26, 95, 122, 0.2);
+}
+
+#search-input {
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    font-size: 14px;
+    width: 150px;
+    outline: none;
+}
+
+body.dark-mode #search-input {
+    color: var(--text-dark);
+}
+
+.search-btn {
+    padding: 8px 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    border-left: 1.5px solid var(--primary);
+}
+
+.search-btn:hover {
+    background-color: var(--primary);
+}
+
 .file-input-label {
     padding: 8px 12px;
     border: 1.5px solid var(--accent);
@@ -164,6 +207,14 @@ body.dark-mode .reading-container {
 
 body.dark-mode .book-content {
     color: var(--text-dark);
+}
+
+.highlight {
+    background-color: var(--accent);
+    color: white;
+    padding: 2px 0;
+    border-radius: 2px;
+    font-weight: bold;
 }
 
 .side-ad {
