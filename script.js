@@ -29,8 +29,7 @@ const books = {
 };
 
 let currentBook = 'alice';
-let currentPage = 0;
-const WORDS_PER_PAGE = 250;
+let scrollPosition = 0; // Stored as percentage (0 to 1)
 
 const bookContent = document.getElementById('book-content');
 const pageCount = document.getElementById('page-count');
@@ -57,6 +56,14 @@ function init() {
     setupEventListeners();
     loadSettings();
     loadBook(currentBook);
+
+    // Periodically save progress while scrolling
+    let saveTimeout;
+    window.addEventListener('scroll', () => {
+        updateProgressBar();
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(saveSettings, 1000);
+    });
 }
 
 function setupEventListeners() {
@@ -90,8 +97,6 @@ function setupEventListeners() {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') goToPreviousPage();
-        if (e.key === 'ArrowRight') goToNextPage();
         if (e.key === 'Enter' && document.activeElement === searchInput) {
             performSearch();
         }
@@ -177,30 +182,21 @@ function readEpubFile(file) {
 }
 
 function loadCustomBook(title, content) {
-    const pages = splitIntoPages(content);
     currentBook = 'custom';
     bookProgress[currentBook] = 0;
-    books.custom = { title: title.replace(/\.[^/.]+$/, ''), pages: pages };
+    books.custom = { title: title.replace(/\.[^/.]+$/, ''), content: content };
     bookSelect.value = 'custom';
     loadBook('custom');
 }
 
-function splitIntoPages(content) {
-    const words = content.split(/\s+/).filter(w => w);
-    const pages = [];
-    for (let i = 0; i < words.length; i += WORDS_PER_PAGE) {
-        pages.push(words.slice(i, i + WORDS_PER_PAGE).join(' '));
-    }
-    return pages.length > 0 ? pages : ['No content'];
-}
 
 function loadBook(bookKey) {
     currentBook = bookKey;
-    currentPage = bookProgress[bookKey] || 0;
+    scrollPosition = bookProgress[bookKey] || 0;
     searchResults = [];
     currentSearchResultIndex = -1;
     updateSearchButtons();
-    displayPage();
+    renderBook();
 }
 
 function performSearch() {
@@ -209,27 +205,21 @@ function performSearch() {
         searchResults = [];
         currentSearchResultIndex = -1;
         updateSearchButtons();
-        displayPage();
+        renderBook();
         return;
     }
 
-    const book = books[currentBook];
-    searchResults = [];
+    renderBook(term);
 
-    for (let i = 0; i < book.pages.length; i++) {
-        if (book.pages[i].toLowerCase().includes(term)) {
-            searchResults.push(i);
-        }
-    }
-
-    if (searchResults.length > 0) {
+    // Find all highlighted spans
+    const highlights = bookContent.querySelectorAll('.highlight');
+    if (highlights.length > 0) {
+        searchResults = Array.from(highlights);
         currentSearchResultIndex = 0;
-        currentPage = searchResults[currentSearchResultIndex];
-        displayPage(term);
-        saveSettings();
+        highlights[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
         alert('Term not found in this book.');
-        currentSearchResultIndex = -1;
+        searchResults = [];
     }
     updateSearchButtons();
 }
@@ -241,9 +231,7 @@ function navigateSearchResult(direction) {
     if (currentSearchResultIndex >= searchResults.length) currentSearchResultIndex = 0;
     if (currentSearchResultIndex < 0) currentSearchResultIndex = searchResults.length - 1;
 
-    currentPage = searchResults[currentSearchResultIndex];
-    displayPage(searchInput.value.trim().toLowerCase());
-    saveSettings();
+    searchResults[currentSearchResultIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
     updateSearchButtons();
 }
 
@@ -252,62 +240,53 @@ function updateSearchButtons() {
     searchPrevBtn.disabled = searchResults.length <= 1;
 }
 
-function displayPage(searchTerm = '') {
-    bookContent.classList.add('fade-out');
+function renderBook(searchTerm = '') {
+    const book = books[currentBook];
+    let content = '';
 
-    setTimeout(() => {
-        const book = books[currentBook];
-        const content = book.pages[currentPage];
+    if (book.pages) {
+        content = book.pages.join('\n\n');
+    } else {
+        content = book.content || 'No content';
+    }
 
-        if (searchTerm) {
-            const regex = new RegExp(`(${searchTerm})`, 'gi');
-            bookContent.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
-        } else {
-            bookContent.textContent = content;
-        }
+    if (searchTerm) {
+        const regex = new RegExp(`(${searchTerm})`, 'gi');
+        bookContent.innerHTML = content.replace(regex, '<span class="highlight">$1</span>');
+    } else {
+        bookContent.innerText = content;
 
-        bookContent.classList.remove('fade-out');
-        updatePageCount();
-        updateButtonStates();
-        updateProgressBar();
-    }, 150);
+        // Restore scroll position after a short delay to allow rendering
+        setTimeout(() => {
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            window.scrollTo(0, scrollPosition * scrollHeight);
+        }, 50);
+    }
+
+    updatePageCount();
+    updateProgressBar();
 }
 
 function updatePageCount() {
-    const book = books[currentBook];
-    const totalPages = book.pages.length;
-    pageCount.textContent = `Page ${currentPage + 1} of ${totalPages}`;
-}
-
-function updateButtonStates() {
-    const book = books[currentBook];
-    prevBtn.disabled = currentPage === 0;
-    nextBtn.disabled = currentPage === book.pages.length - 1;
+    pageCount.textContent = `Reading: ${books[currentBook].title}`;
 }
 
 function updateProgressBar() {
-    const book = books[currentBook];
-    const progress = ((currentPage + 1) / book.pages.length) * 100;
-    progressFill.style.width = progress + '%';
-}
-
-function goToPreviousPage() {
-    if (currentPage > 0) {
-        currentPage--;
-        displayPage();
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollHeight <= 0) {
+        progressFill.style.width = '0%';
+        scrollPosition = 0;
+        return;
     }
-}
 
-function goToNextPage() {
-    const book = books[currentBook];
-    if (currentPage < book.pages.length - 1) {
-        currentPage++;
-        displayPage();
-    }
+    const scrolled = window.scrollY;
+    const progress = (scrolled / scrollHeight) * 100;
+    progressFill.style.width = Math.min(100, Math.max(0, progress)) + '%';
+    scrollPosition = scrolled / scrollHeight;
 }
 
 function saveSettings() {
-    bookProgress[currentBook] = currentPage;
+    bookProgress[currentBook] = scrollPosition;
     const settings = {
         fontSize: fontSizeInput.value,
         lineHeight: lineHeightInput.value,
@@ -337,7 +316,7 @@ function loadSettings() {
 
         bookProgress = settings.bookProgress || {};
         currentBook = settings.currentBook || 'alice';
-        currentPage = bookProgress[currentBook] || 0;
+        scrollPosition = bookProgress[currentBook] || 0;
         bookSelect.value = currentBook;
     }
 }

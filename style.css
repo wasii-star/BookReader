@@ -266,6 +266,19 @@ body.dark-mode .side-ad {
     color: #777;
 }
 
+.mobile-ad {
+    display: none;
+    margin-top: 24px;
+    padding: 12px;
+    background-color: #f5f1e8;
+    border-radius: 8px;
+    text-align: center;
+}
+
+body.dark-mode .mobile-ad {
+    background-color: #333;
+}
+
 .ad-banner {
     background: var(--bg-light);
     border-bottom: 1px solid var(--border);
@@ -344,6 +357,22 @@ body.dark-mode .ad-banner {
     background-color: #e0e0e0;
     border-radius: 3px;
     overflow: hidden;
+}
+
+.scrolling-progress {
+    position: sticky;
+    bottom: 20px;
+    background-color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    margin: 0 !important;
+    z-index: 100;
+}
+
+body.dark-mode .scrolling-progress {
+    background-color: #2a2a2a;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .progress-bar {
@@ -463,6 +492,10 @@ body.dark-mode .dark-mode-toggle {
     .settings {
         flex-direction: column;
         gap: 12px;
+    }
+
+    .mobile-ad {
+        display: block;
     }
 
     .setting-group {
